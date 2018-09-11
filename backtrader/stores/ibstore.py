@@ -661,6 +661,8 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         # Keep a copy for error reporting purposes
         kwargs = locals().copy()
         kwargs.pop('self', None)  # remove self, no need to report it
+        self.timeframe = timeframe
+        self.compression = compression
 
         if timeframe < TimeFrame.Seconds:
             # Ticks are not supported
@@ -783,7 +785,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.conn.cancelHistoricalData(self.ts[q])
             self.cancelQueue(q, True)
 
-    def reqRealTimeBars(self, contract, useRTH=False, duration=5):
+    def reqRealTimeBars(self, contract, useRTH=False, duration=5, what=None):
         '''Creates a request for (5 seconds) Real Time Bars
 
         Params:
@@ -795,14 +797,21 @@ class IBStore(with_metaclass(MetaSingleton, object)):
           - a Queue the client can wait on to receive a RTVolume instance
         '''
         # get a ticker/queue for identification/data delivery
+        self.duration = duration
         tickerId, q = self.getTickerQueue()
 
         # 20150929 - Only 5 secs supported for duration
+        if not what:
+            what = 'TRADES'
+
+        if contract.m_secType in ['CASH']:
+            what = 'BID'
+
         self.conn.reqRealTimeBars(
             tickerId,
             contract,
             duration,
-            bytes('TRADES'),
+            bytes(what),
             int(useRTH))
 
         return q
@@ -908,6 +917,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         '''
         # Get a naive localtime object
         msg.time = datetime.utcfromtimestamp(float(msg.time))
+        msg.time += timedelta(seconds=self.duration)
         self.qs[msg.reqId].put(msg)
 
     @ibregister
@@ -948,11 +958,12 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
                 if dteosutc <= datetime.utcnow():
                     dt = dteosutc
-
                 msg.date = dt
+                msg.date += timedelta(seconds=self.compression)
             else:
                 msg.date = datetime.utcfromtimestamp(long(dtstr))
-
+                msg.date += timedelta(seconds=self.compression)
+        # print(datetime.utcnow(), msg)
         q.put(msg)
 
     # The _durations are meant to calculate the needed historical data to
