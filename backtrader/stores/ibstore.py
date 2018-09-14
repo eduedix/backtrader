@@ -796,6 +796,8 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         Returns:
           - a Queue the client can wait on to receive a RTVolume instance
         '''
+
+        self.duration = duration
         # get a ticker/queue for identification/data delivery
         tickerId, q = self.getTickerQueue()
 
