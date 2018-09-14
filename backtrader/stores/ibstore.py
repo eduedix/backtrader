@@ -785,7 +785,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.conn.cancelHistoricalData(self.ts[q])
             self.cancelQueue(q, True)
 
-    def reqRealTimeBars(self, contract, useRTH=False, duration=5, what=None):
+    def reqRealTimeBars(self, contract, duration=5, what=None, useRTH=False):
         '''Creates a request for (5 seconds) Real Time Bars
 
         Params:
@@ -797,15 +797,14 @@ class IBStore(with_metaclass(MetaSingleton, object)):
           - a Queue the client can wait on to receive a RTVolume instance
         '''
         # get a ticker/queue for identification/data delivery
-        self.duration = duration
         tickerId, q = self.getTickerQueue()
 
         # 20150929 - Only 5 secs supported for duration
         if not what:
             what = 'TRADES'
+            if contract.m_secType in ['CASH']:
+                what = 'BID'
 
-        if contract.m_secType in ['CASH']:
-            what = 'BID'
 
         self.conn.reqRealTimeBars(
             tickerId,

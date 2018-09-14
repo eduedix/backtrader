@@ -414,7 +414,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self._usertvol:
             self.qlive = self.ib.reqMktData(self.contract)
         else:
-            self.qlive = self.ib.reqRealTimeBars(self.contract)
+            self.qlive = self.ib.reqRealTimeBars(self.contract, duration=5, what=self.p.what, useRTH=self.p.useRTH)
 
         return self.qlive
 
