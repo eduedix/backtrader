@@ -960,10 +960,34 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if dteosutc <= datetime.utcnow():
                     dt = dteosutc
                 msg.date = dt
-                msg.date += timedelta(seconds=self.compression)
+
+                if self.timeframe:
+                    if self.timeframe == TimeFrame.Days:
+                        msg.date += timedelta(days=self.compression)
+                    elif self.timeframe == TimeFrame.Hours:
+                        msg.date += timedelta(hours=self.compression)
+                    elif self.timeframe == TimeFrame.Seconds:
+                        msg.date += timedelta(seconds=self.compression)
+                    elif self.timeframe == TimeFrame.Minutes:
+                        msg.date += timedelta(minutes=self.compression)
+                else:
+                    msg.date += timedelta(Days=self.compression)
             else:
                 msg.date = datetime.utcfromtimestamp(long(dtstr))
-                msg.date += timedelta(seconds=self.compression)
+
+                if self.timeframe:
+                    if self.timeframe == TimeFrame.Days:
+                        msg.date += timedelta(days=self.compression)
+                    elif self.timeframe == TimeFrame.Hours:
+                        msg.date += timedelta(hours=self.compression)
+                    elif self.timeframe == TimeFrame.Seconds:
+                        msg.date += timedelta(seconds=self.compression)
+                    elif self.timeframe == TimeFrame.Minutes:
+                        msg.date += timedelta(minutes=self.compression)
+                else:
+                    msg.date += timedelta(Days=self.compression)
+
+                # msg.date += timedelta(seconds=self.compression)
         # print(datetime.utcnow(), msg)
         q.put(msg)
 
