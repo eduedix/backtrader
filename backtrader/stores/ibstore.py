@@ -964,8 +964,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if self.timeframe:
                     if self.timeframe == TimeFrame.Days:
                         msg.date += timedelta(days=self.compression)
-                    elif self.timeframe == TimeFrame.Hours:
-                        msg.date += timedelta(hours=self.compression)
                     elif self.timeframe == TimeFrame.Seconds:
                         msg.date += timedelta(seconds=self.compression)
                     elif self.timeframe == TimeFrame.Minutes:
@@ -978,8 +976,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
                 if self.timeframe:
                     if self.timeframe == TimeFrame.Days:
                         msg.date += timedelta(days=self.compression)
-                    elif self.timeframe == TimeFrame.Hours:
-                        msg.date += timedelta(hours=self.compression)
                     elif self.timeframe == TimeFrame.Seconds:
                         msg.date += timedelta(seconds=self.compression)
                     elif self.timeframe == TimeFrame.Minutes:
