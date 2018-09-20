@@ -359,11 +359,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.p.backfill_from is not None:
             self._state = self._ST_FROM
 
-            backfill_from = self.p.backfill_from
-            if not isinstance(backfill_from, list):
-                backfill_from = [backfill_from]
+            if not isinstance(self.p.backfill_from, list):
+                self.p.backfill_from = [self.p.backfill_from]
 
-            for b in backfill_from:
+            for b in self.p.backfill_from:
                 b.setenvironment(self._env)
                 b._start()
             # self.p.backfill_from.setenvironment(self._env)
@@ -601,6 +600,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 continue
 
             elif self._state == self._ST_FROM:
+                if not isinstance(self.p.backfill_from, list):
+                    self.p.backfill_from = [self.p.backfill_from]
                 if not self.p.backfill_from[-1].next():
                 # if not self.p.backfill_from.next():
                     # additional data source is consumed
