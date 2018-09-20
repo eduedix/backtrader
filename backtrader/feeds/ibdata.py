@@ -358,8 +358,16 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
         if self.p.backfill_from is not None:
             self._state = self._ST_FROM
-            self.p.backfill_from.setenvironment(self._env)
-            self.p.backfill_from._start()
+
+            backfill_from = self.p.backfill_from
+            if not isinstance(backfill_from, list):
+                backfill_from = [backfill_from]
+
+            for b in backfill_from:
+                b.setenvironment(self._env)
+                b._start()
+            # self.p.backfill_from.setenvironment(self._env)
+            # self.p.backfill_from._start()
         else:
             self._state = self._ST_START  # initial state for _load
         self._statelivereconn = False  # if reconnecting in live state
@@ -593,14 +601,16 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                 continue
 
             elif self._state == self._ST_FROM:
-                if not self.p.backfill_from.next():
+                if not self.p.backfill_from[-1].next():
+                # if not self.p.backfill_from.next():
                     # additional data source is consumed
                     self._state = self._ST_START
                     continue
 
                 # copy lines of the same name
                 for alias in self.lines.getlinealiases():
-                    lsrc = getattr(self.p.backfill_from.lines, alias)
+                    # lsrc = getattr(self.p.backfill_from.lines, alias)
+                    lsrc = getattr(self.p.backfill_from[-1].lines, alias)
                     ldst = getattr(self.lines, alias)
 
                     ldst[0] = lsrc[0]
