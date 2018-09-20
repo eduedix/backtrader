@@ -442,6 +442,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.contract is None or self._state == self._ST_OVER:
             return False  # nothing can be done
 
+        backfill_from_length = len(self.p.backfill_from)
+        if backfill_from_length:
+            backfill_from_idx = 0
+
         while True:
             if self._state == self._ST_LIVE:
                 try:
@@ -602,20 +606,23 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             elif self._state == self._ST_FROM:
                 if not isinstance(self.p.backfill_from, list):
                     self.p.backfill_from = [self.p.backfill_from]
-                if not self.p.backfill_from[-1].next():
-                # if not self.p.backfill_from.next():
+
+                if not self.p.backfill_from[backfill_from_idx].next():
                     # additional data source is consumed
-                    self._state = self._ST_START
-                    continue
+
+                    if backfill_from_idx == backfill_from_length - 1:
+                        self._state = self._ST_START
+                        continue
+                    else:
+                        backfill_from_idx += 1
+                        continue
 
                 # copy lines of the same name
                 for alias in self.lines.getlinealiases():
                     # lsrc = getattr(self.p.backfill_from.lines, alias)
-                    lsrc = getattr(self.p.backfill_from[-1].lines, alias)
+                    lsrc = getattr(self.p.backfill_from[backfill_from_idx].lines, alias)
                     ldst = getattr(self.lines, alias)
-
                     ldst[0] = lsrc[0]
-
                 return True
 
             elif self._state == self._ST_START:
