@@ -442,9 +442,10 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.contract is None or self._state == self._ST_OVER:
             return False  # nothing can be done
 
-        backfill_from_length = len(self.p.backfill_from)
-        if backfill_from_length:
-            backfill_from_idx = 0
+        if self.p.backfill_from is not None and len(self.p.backfill_from):
+            backfill_from_length = len(self.p.backfill_from)
+            if backfill_from_length:
+                backfill_from_idx = 0
 
         while True:
             if self._state == self._ST_LIVE:
